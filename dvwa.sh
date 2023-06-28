@@ -60,8 +60,8 @@ function type_effect() {
 }
 
 # Select a random banner
-# random_index=$((RANDOM % ${#banners[@]}))
-# banner="${banners[$random_index]}"
+random_index=$((RANDOM % ${#banners[@]}))
+banner="${banners[$random_index]}"
 
 # Display random banner
 echo "$banner"
@@ -116,4 +116,64 @@ type_effect "➡ Configuring MySQL..." 0.05
 echo
 git clone https://github.com/ethicalhack3r/DVWA.git /var/www/html/dvwa
 sleep 1
+
+# Configure MySQL for DVWA
+echo
+type_effect "➡ Configuring MySQL..." 0.05
+echo
+mysql -e "CREATE DATABASE IF NOT EXISTS dvwa;"
+mysql -e "CREATE USER 'dvwa'@'localhost' IDENTIFIED BY 'p@ssw0rd';"
+mysql -e "GRANT ALL PRIVILEGES ON dvwa.* TO 'dvwa'@'localhost';"
+mysql -e "FLUSH PRIVILEGES;"
+sleep 1
+
+# Copy the DVWA config file
+echo
+type_effect "➡ Copying DVWA config file..." 0.05
+echo
+cp /var/www/html/dvwa/config/config.inc.php.dist /var/www/html/dvwa/config/config.inc.php
+sleep 1
+
+# Set the security level to low
+echo
+type_effect "➡ Setting security level to low..." 0.05
+echo
+sed -i "s/'default_security_level' = 'impossible'/'default_security_level' = 'low'/" /var/www/html/dvwa/config/config.inc.php
+sleep 1
+
+# Enable allow_url_fopen and allow_url_include in php.ini
+echo
+type_effect "➡ Enabling allow_url_fopen and allow_url_include..." 0.05
+echo
+sed -i 's/;allow_url_fopen = Off/allow_url_fopen = On/' /etc/php/8.1/apache2/php.ini
+sed -i 's/allow_url_include = Off/allow_url_include = On/' /etc/php/8.1/apache2/php.ini
+sleep 1
+
+# Change permissions
+echo
+type_effect "➡ Changing permissions..." 0.05
+echo
+chown -R www-data:www-data /var/www/html/dvwa/
+chmod -R 755 /var/www/html/dvwa/
+sleep 1
+
+# Set DVWA as the default website
+echo
+type_effect "➡ Setting DVWA as default website..." 0.05
+echo
+sed -i 's@DocumentRoot /var/www/html@DocumentRoot /var/www/html/dvwa@' /etc/apache2/sites-available/000-default.conf
+sed -i 's@<Directory /var/www/html>@<Directory /var/www/html/dvwa>@' /etc/apache2/sites-available/000-default.conf
+sleep 1
+
+# Restart Apache again
+echo
+type_effect "➡ Restarting Apache..." 0.05
+echo
+systemctl restart apache2
+sleep 1
+
+echo
+echo "DVWA setup complete!"
+echo "username = admin , Password = password"
+echo "@credits Rupesh Pandey"
 
