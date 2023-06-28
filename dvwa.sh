@@ -60,8 +60,8 @@ function type_effect() {
 }
 
 # Select a random banner
-random_index=$((RANDOM % ${#banners[@]}))
-banner="${banners[$random_index]}"
+# random_index=$((RANDOM % ${#banners[@]}))
+# banner="${banners[$random_index]}"
 
 # Display random banner
 echo "$banner"
